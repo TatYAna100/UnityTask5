@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(SpriteRenderer))]
+
 public class Alarm : MonoBehaviour
 {
     [HideInInspector] private SpriteRenderer _spriteRenderer;
@@ -9,6 +11,7 @@ public class Alarm : MonoBehaviour
     private float _targetVolume;
     private float _fadeVolumeTime = 0.001f;
     private Color _startColor;
+    private Coroutine _runCoroutine;
 
     public void Start()
     {
@@ -22,7 +25,7 @@ public class Alarm : MonoBehaviour
         {
             _audioSource.volume += Time.deltaTime * _fadeVolumeTime;
             _targetVolume = 1;
-            StartCoroutine(ChangeVolumeSmoothly(_targetVolume));
+            Work(_targetVolume);
             _spriteRenderer.color = Color.red;
         }
     }
@@ -33,9 +36,19 @@ public class Alarm : MonoBehaviour
         {
             _audioSource.volume -= Time.deltaTime * _fadeVolumeTime;
             _targetVolume = 0;
-            StartCoroutine(ChangeVolumeSmoothly(_targetVolume));
+            Work(_targetVolume);
             _spriteRenderer.color = _startColor;
         }
+    }
+
+    private void Work(float targetVolume)
+    {
+        if (_runCoroutine != null)
+        {
+            StopCoroutine(_runCoroutine);
+        }
+
+        _runCoroutine = StartCoroutine(ChangeVolumeSmoothly(targetVolume));
     }
 
     private IEnumerator ChangeVolumeSmoothly(float targetVolume)
